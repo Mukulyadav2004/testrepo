@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: agentobs-postgres
+    environment:
+      POSTGRES_USER: agentobs
+      POSTGRES_PASSWORD: agentobs
+      POSTGRES_DB: agentobs
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentobs"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: agentobs-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: agentobs-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  ingestion-server:
+    build:
+      context: ./ingestion-server
+    container_name: agentobs-ingestion-server
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./worker
+    container_name: agentobs-worker
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DATABASE_URL: postgresql+asyncpg://agentobs:agentobs@postgres:5432/agentobs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  api-server:
+    build:
+      context: .
+      dockerfile: api-server/Dockerfile
+    container_name: agentobs-api-server
+    environment:
+      DATABASE_URL: postgresql://agentobs:agentobs@postgres:5432/agentobs
+      OLLAMA_HOST: http://ollama:11434
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  redis-data:
+  ollama-data:

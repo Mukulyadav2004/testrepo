@@ -1,0 +1,9 @@
+Generic single-database configuration for the worker service.
+
+The database URL is read from the DATABASE_URL environment variable (see migrations/env.py).
+The worker uses the asyncpg driver at runtime; Alembic coerces the URL to psycopg2 for
+synchronous migrations, so ensure psycopg2-binary is installed.
+
+Usage:
+    export DATABASE_URL=postgresql+asyncpg://agentobs:agentobs@localhost:5432/agentobs
+    alembic upgrade head

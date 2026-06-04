@@ -1,0 +1,10 @@
+grpcio
+grpcio-tools
+fastapi
+uvicorn
+redis
+sqlalchemy
+asyncpg
+psycopg2-binary
+pydantic
+httpx

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Generated gRPC stubs (regenerate with: bash proto/generate.sh)
+**/trace_pb2.py
+**/trace_pb2_grpc.py
+
+# Tooling / IDE
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Env files
+.env
+*.local
